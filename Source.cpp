@@ -1,194 +1,230 @@
 #include <iostream>
 using namespace std;
-
-class node
+template<typename T>
+struct DNode
 {
-public:
-	int data;
-	node* next;
-	node(int val)
+	T val;
+	DNode* next;
+	DNode* prev;
+	DNode( T value)
 	{
-		data = val;
+		val = value;
 		next = nullptr;
+		prev = nullptr;
 	}
-
 };
-
-class LSLL
+template <typename T>
+class Dsll
 {
-	node* head;
-public:
-	LSLL()
+	DNode <T>* head;
+public :
+	Dsll()
 	{
 		head = nullptr;
 	}
-	void insertattail(int val)
+	void insertathead(T val)
 	{
-		node* ptr = new node(val);
-		if (head == nullptr)
+		DNode<T>* ptr = new DNode<T>(val);
+		if (!head)
 		{
 			head = ptr;
 			return;
 		}
-		node* x = head;
-		while (x->next != nullptr)
-		{
-			x = x->next;
-		}
-		x->next = ptr;
-	}
-	void insertathead(int val)
-	{
-		node* ptr = new node(val);
-		if (head == nullptr)
-		{
-			head = ptr;
-			return;
-		}
+		head->prev = ptr;
 		ptr->next = head;
 		head = ptr;
 	}
-	void insertafter(int val, int key)
+	void deleteathead()
 	{
-		
 		if (!head)
 		{
+			cout << " :( list is empty" << endl;
 			return;
 		}
-		node* ptr = new node(val);
-		node* x = head;
-		while (x->next!=nullptr&& x->data!=key)
-		{
-			x = x->next;
-		}
-		if (!x)
-		{
-			return;
-		}
-		ptr->next = x->next;
-		x->next = ptr;
+		DNode<T>* temp = head;
+		head = temp->next;
+		head->prev = nullptr;
+		delete temp;
 	}
-	void insertbeofore( int val,int key)
+	void insertAtTail(T val)
 	{
 		if (!head)
 		{
+			insertathead(val);
 			return;
 		}
-		node* ptr = new node(val);
-		if (head->data == key)
+		DNode<T>* ptr = new DNode<T>(val);
+		DNode <T>* current = head;
+		while (current->next != nullptr)
 		{
-			ptr->next = head;
-			head = ptr;
-			return;
-
-		}
-		
-		node* prev = head;
-		node* ne = prev->next;
-		while (ne != nullptr && ne->data != key)
-		{
-			prev = ne;
-			ne = ne->next;
-		}
-		if (!ne) {
-			return;
-		}
-		ptr->next = prev->next;
-		prev->next = ptr;
-
-	}
-	void removeathead()
-	{
-		if (!head)
-		{
-			return;
-		}
-		node* x = head;
-		head = head->next;
-		delete x;
-	}
-	void removeattail()
-	{
-		if (!head)
-			return;
-		if (head->next == nullptr)
-		{
-			delete head;
-			head = nullptr;
-		}
-		node* ptr = head;
-		node * current = head->next;
-		while (current != nullptr)
-		{          
-			ptr = current;
 			current = current->next;
 		}
-		ptr->next = nullptr;
-		delete current;
+		current->next = ptr;
+		ptr->prev = current;
+
 	}
-	void removeafter(int key)
+	void deleteAtTail()
 	{
 		if (!head)
+		{
+			cout << " list is empty" << endl;
 			return;
-		node* ptr = head;
-		node* x = nullptr;
-		while (ptr != nullptr && ptr->data != key)
+		}
+		DNode<T>* ptr = head;
+		while (ptr->next != nullptr)
 		{
 			ptr = ptr->next;
 		}
-		if (ptr != nullptr)
+		DNode<T>* x = ptr->prev;
+		x->next = nullptr;
+		delete ptr;
+
+	}
+	void inssertbefore(T val, T key)
+	{
+		if (!head)
 		{
-			x = ptr->next;
-			ptr->next = x->next;
-			delete x;
+			cout << " list is null " << endl;
+			return;
+		}
+		if (head->val == key)
+		{
+			insertathead(val);
+		}
+		
+		DNode<T>* temp = head;
+		while (temp->next != nullptr && temp->val != key)
+		{
+			temp = temp->next;
+		}
+		if (temp->next != nullptr)
+		{
+			DNode <T>* newnode = new DNode<T>(val);
+			newnode->next = temp;
+			newnode->prev = temp->prev;
+			temp->prev->next = newnode;
+			temp->prev = newnode;
+		}
+		
+	}
+	void deletebefore(T key)
+	{
+		if (!head)
+		{
+			cout << "list is empty" << endl;
+			return;
+		}
+		if (head->val == key)
+		{
+			return;
+		}
+		DNode<T>* ptr = head;
+		while (ptr->next != nullptr&& ptr->val!=key)
+		{
+			ptr =ptr->next;
+		}
+		DNode <T>* temp = ptr->prev;
+		
+		if (!ptr->next)
+		{
+			if (temp->prev == nullptr)
+			{
+				deleteathead();
+				return;
+			}
+			ptr->prev = ptr->prev->prev;
+			temp->prev->next= ptr;
+			delete temp;
 		}
 	}
-	void removebefore(int val)
+	void insertafter(T val, T key)
 	{
 		if (!head)
 			return;
-		if (head->next->data == val)
+		
+		DNode<T>* temp = head;
+		while (temp != nullptr && temp->val != key)
 		{
-			removeathead();
+			temp = temp->next;
+		}
+		if (temp->next != nullptr)
+		{
+			DNode<T>* newnode = new DNode<T>(val);
+			newnode->next = temp->next;
+			newnode->prev = temp;
+			temp->next = newnode;
+			if (newnode->next != nullptr)
+			{
+				newnode->next->prev = newnode;
+			}
+
+		}
+	}
+	void deleteafter( T key)
+	{
+		if (!head)
+		{
 			return;
 		}
-		node* ptr = head;
-		while (ptr->next->next != nullptr && ptr->next->next->data != val)
+		DNode<T>* temp = head;
+		while (temp->next != nullptr && temp->val != key)
 		{
-			ptr = ptr->next;
+			temp = temp->next;
 		}
-		node* x = ptr->next;
-		if (ptr->next->next != nullptr)
+		if (temp->next == nullptr)
 		{
-			ptr->next = ptr->next->next;
-			delete x;
+			return;
+		}
+		if (temp->next != nullptr)
+		{
+			DNode<T>* x = temp->next;
+			temp->next = x->next;
+			if(x->next!=nullptr)
+				x->next->prev = temp;
+				delete x;
 		}
 	}
 	void print()
 	{
-		node* ptr = head;
-		while (ptr)
+		DNode<T>* temp = head;
+		DNode<T>* tail = head;
+		while (temp != nullptr)
 		{
-			cout << ptr->data<<endl;
-			ptr = ptr->next;
+			cout << temp->val << endl;
+			temp = temp->next;
+			tail = temp;
+		}
+		while (tail != nullptr)
+		{
+			cout << tail->val << endl;
+			tail = tail->prev;
 		}
 	}
-
 };
 int main()
 {
-	LSLL  one;
-	one.insertattail(7);
-	one.insertathead(4);
-	one.insertafter(6,4);
-	one.removeafter(3);
-	one.insertafter(3,7);
+	Dsll <int> one;
+	one.insertathead(5);
 	one.insertathead(2);
-	one.insertbeofore(1,3);
-	one.insertathead(23);
-	one.insertafter(12, 4);
-	one.removeafter(4);
-	one.removeathead();
-	one.removebefore(7);
+	one.insertathead(7);
+	one.insertathead(45);
+	one.insertafter(12, 7);
+	
+	/*one.insertAtTail(3);*/
+	/*one.insertAtTail(1);*/
+	one.print();
+	cout << " after deleting " << endl;
+	/*one.deletebefore(5);*/
+	/*one.insertathead(6);
+	one.insertathead(3);
+	one.insertathead(2);
+	one.inssertbefore(4,6);
+	one.deleteathead();*/
+	/*one.insertAtTail(66);
+	one.print();
+	cout << " after deleting at head" << endl;
+	one.deleteAtTail();*/
+	one.deleteafter(2);
 	one.print();
 }
+
