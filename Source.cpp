@@ -1,194 +1,95 @@
 #include <iostream>
 using namespace std;
-
-class node
+template < typename T>
+class Stack
 {
-public:
-	int data;
-	node* next;
-	node(int val)
+private:
+	T* data;
+	int top;
+	int capacity;
+
+	void resize(int newCpacity)
 	{
-		data = val;
-		next = nullptr;
+		T* teo = new T[newCpacity];
+		for (int i = 0; i < top; i++)
+		{
+			teo[i] = data[i];
+		}
+		int temptop = top;
+		this->~Stack();
+		data = teo;
+		capacity = newCpacity;
+		top = temptop;
 	}
+public:
+	Stack()
+	{
+		capacity = 0;
+		top = 0;
+		data = nullptr;
+	}
+	void push(T val)
+	{
+		if (isFull())
+			resize(capacity == 0 ? 1 : capacity * 2);
+		data[top++] = val;
+	}
+	int isFull()
+	{
+		if (top == capacity)
+		{
+			return true;
+		}
+		return false;
+	}
+	bool isEmpty()
+	{
+		return top == 0;
+	}
+	T pop()
+	{
 
+		if (isEmpty())
+			exit(0);
+		T val = data[--top];
+		if (top > 0 && top == capacity / 4)
+			resize(capacity / 2);
+		return val;
+	}
+	T stackTop()
+	{
+		return data[top - 1];
+	}
+	~Stack()
+	{
+		if (!data)
+			return;
+		delete[]data;
+		data = nullptr;
+		capacity = 0;
+		top = 0;
+	}
 };
-
-class LSLL
+string reverse(string  a)
 {
-	node* head;
-public:
-	LSLL()
+	string s;
+	Stack<char> h;
+	int x = a.size();
+	for (int i = 0; i < x; i++)
 	{
-		head = nullptr;
-	}
-	void insertattail(int val)
-	{
-		node* ptr = new node(val);
-		if (head == nullptr)
-		{
-			head = ptr;
-			return;
-		}
-		node* x = head;
-		while (x->next != nullptr)
-		{
-			x = x->next;
-		}
-		x->next = ptr;
-	}
-	void insertathead(int val)
-	{
-		node* ptr = new node(val);
-		if (head == nullptr)
-		{
-			head = ptr;
-			return;
-		}
-		ptr->next = head;
-		head = ptr;
-	}
-	void insertafter(int val, int key)
-	{
+		h.push(a[i]);
 		
-		if (!head)
-		{
-			return;
-		}
-		node* ptr = new node(val);
-		node* x = head;
-		while (x->next!=nullptr&& x->data!=key)
-		{
-			x = x->next;
-		}
-		if (!x)
-		{
-			return;
-		}
-		ptr->next = x->next;
-		x->next = ptr;
 	}
-	void insertbeofore( int val,int key)
+	for (int i = 0; i < x; i++)
 	{
-		if (!head)
-		{
-			return;
-		}
-		node* ptr = new node(val);
-		if (head->data == key)
-		{
-			ptr->next = head;
-			head = ptr;
-			return;
 
-		}
-		
-		node* prev = head;
-		node* ne = prev->next;
-		while (ne != nullptr && ne->data != key)
-		{
-			prev = ne;
-			ne = ne->next;
-		}
-		if (!ne) {
-			return;
-		}
-		ptr->next = prev->next;
-		prev->next = ptr;
+		s += h.pop();
 
 	}
-	void removeathead()
-	{
-		if (!head)
-		{
-			return;
-		}
-		node* x = head;
-		head = head->next;
-		delete x;
-	}
-	void removeattail()
-	{
-		if (!head)
-			return;
-		if (head->next == nullptr)
-		{
-			delete head;
-			head = nullptr;
-		}
-		node* ptr = head;
-		node * current = head->next;
-		while (current != nullptr)
-		{          
-			ptr = current;
-			current = current->next;
-		}
-		ptr->next = nullptr;
-		delete current;
-	}
-	void removeafter(int key)
-	{
-		if (!head)
-			return;
-		node* ptr = head;
-		node* x = nullptr;
-		while (ptr != nullptr && ptr->data != key)
-		{
-			ptr = ptr->next;
-		}
-		if (ptr != nullptr)
-		{
-			x = ptr->next;
-			ptr->next = x->next;
-			delete x;
-		}
-	}
-	void removebefore(int val)
-	{
-		if (!head)
-			return;
-		if (head->next->data == val)
-		{
-			removeathead();
-			return;
-		}
-		node* ptr = head;
-		while (ptr->next->next != nullptr && ptr->next->next->data != val)
-		{
-			ptr = ptr->next;
-		}
-		node* x = ptr->next;
-		if (ptr->next->next != nullptr)
-		{
-			ptr->next = ptr->next->next;
-			delete x;
-		}
-	}
-	void print()
-	{
-		node* ptr = head;
-		while (ptr)
-		{
-			cout << ptr->data<<endl;
-			ptr = ptr->next;
-		}
-	}
-
-};
+	return s;
+ }
 int main()
 {
-	LSLL  one;
-	one.insertattail(7);
-	one.insertathead(4);
-	one.insertafter(6,4);
-	one.removeafter(3);
-	one.insertafter(3,7);
-	one.insertathead(2);
-	one.insertbeofore(1,3);
-	one.insertathead(23);
-	one.insertafter(12, 4);
-	one.removeafter(4);
-	one.removeathead();
-	one.removebefore(7);
-	one.print();
+	string k = "amnashahzadi";
+	cout << reverse(k);
 }
