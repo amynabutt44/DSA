@@ -10,14 +10,14 @@ private:
 
 	void resize(int newCpacity)
 	{
-		T* teo = new T[newCpacity];
+		T* temp = new T[newCpacity];
 		for (int i = 0; i < top; i++)
 		{
-			teo[i] = data[i];
+			temp[i] = data[i];
 		}
 		int temptop = top;
 		this->~Stack();
-		data = teo;
+		data = temp;
 		capacity = newCpacity;
 		top = temptop;
 	}
@@ -46,6 +46,45 @@ public:
 	{
 		return top == 0;
 	}
+
+	Stack(const Stack<T>& ref)
+	{
+		if (ref->capacity <= 0)
+		{
+			data = nullptr;
+			capacity = 0;
+			return;
+		}
+		capacity = ref.capacity;
+		data = new T[capacity];
+		for (int i = 0; i < capacity; i++)
+		{
+			this - data[i] = ref.data[i];
+		}
+	}
+
+	//Assignment Operator
+	Stack& operator=(const Stack<T>& ref)
+	{
+		if (ref.data == nullptr)
+		{
+			data = nullptr;
+			capacity = 0;
+			//	return;
+		}
+		if (ref == *this)
+		{
+			return *this;
+		}
+		this->~Stack();
+		capacity = ref.capacity;
+		data = new T[capacity];
+		for (int i = 0; i < capacity; i++)
+		{
+			this->data[i] = ref.data[i];
+		}
+		return *this;
+	}
 	T pop()
 	{
 
@@ -58,6 +97,7 @@ public:
 	}
 	T stackTop()
 	{
+		
 		return data[top - 1];
 	}
 	~Stack()
@@ -69,27 +109,63 @@ public:
 		capacity = 0;
 		top = 0;
 	}
+
 };
-string reverse(string  a)
+bool bracketbalance(string exp)
 {
-	string s;
-	Stack<char> h;
-	int x = a.size();
-	for (int i = 0; i < x; i++)
+	Stack<char> s;
+	char x;
+	for (int i = 0; i < exp.size(); i++)
 	{
-		h.push(a[i]);
+		if (exp[i] == '[' || exp[i] == '{' || exp[i] == '(')
+		{
+			s.push(exp[i]);
+		}
+		
+		else if (exp[i] == '}' || exp[i] == ']' || exp[i] == ')')
+		{
+			if (s.isEmpty())
+			{
+				return false;
+			}
+		}
+			
+			if (exp[i] == ']')
+			{
+				x = s.stackTop();
+				s.pop();
+				if (x == '(' || x == '{')
+					return false;
+			}
+
+			if (exp[i] == '}')
+			{
+				x = s.stackTop();
+				s.pop();
+				if (x == '(' || x == '[')
+					return false;
+			}
+
+			if (exp[i] == ')')
+			{
+
+				x = s.stackTop();
+				s.pop();
+				if (x == '[' || x == '{')
+					return false;
+			}
 		
 	}
-	for (int i = 0; i < x; i++)
-	{
-
-		s += h.pop();
-
-	}
-	return s;
- }
+	return s.isEmpty();
+}
 int main()
 {
-	string k = "amnashahzadi";
-	cout << reverse(k);
+	string expr = "{()}[]";
+
+	// Function call
+	if (bracketbalance(expr))
+		cout << "Balanced";
+	else
+		cout << "Not Balanced";
+	return 0;
 }
