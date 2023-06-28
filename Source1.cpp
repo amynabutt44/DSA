@@ -1,274 +1,133 @@
 #include <iostream>
 using namespace std;
-
-template <typename T>
-class NDArray
+template < typename T>
+class Stack
 {
+private:
 	T* data;
-	int noOfDimensions;
-	int* sizeOfDimensions;
-	int* startingIndex;
-	int getRowMajorIndexMapping(const initializer_list<int>& list)const
+	int top;
+	int capacity;
+
+	void resize(int newCpacity)
 	{
-		int index = 0;
-		int sum = 0;
-		int number;
-		for (auto idx : list)
+		T* temp = new T[newCpacity];
+		for (int i = 0; i < top; i++)
 		{
-			number = idx - startingIndex[index];
-			for (int j = index + 1; j < noOfDimensions; j++)
-			{
-				number = number * sizeOfDimensions[j];
-			}
-			sum += number;
-			index++;
+			temp[i] = data[i];
 		}
-		return sum;
+		int temptop = top;
+		this->~Stack();
+		data = temp;
+		capacity = newCpacity;
+		top = temptop;
 	}
-	bool isValidDimension(int idx)const
+public:
+	Stack()
 	{
-		if (idx >= 0 && idx < noOfDimensions)
+		capacity = 0;
+		top = 0;
+		data = nullptr;
+	}
+	void push(T val)
+	{
+		if (isFull())
+			resize(capacity == 0 ? 1 : capacity * 2);
+		data[top++] = val;
+	}
+	int isFull()
+	{
+		if (top == capacity)
 		{
 			return true;
 		}
 		return false;
 	}
-public:
-	NDArray(const initializer_list<int>l1 = {}, const initializer_list<int>l2 = {})
+	bool isEmpty()
 	{
-		noOfDimensions = l1.size();
-
-		if (l1.size() == 0)
-		{
-			noOfDimensions = 0;
-			data = nullptr;
-		}
-		else
-		{
-			sizeOfDimensions = new int[noOfDimensions];
-			startingIndex = new int[noOfDimensions];
-			int i = 0;
-			for (auto val : l1)
-			{
-				sizeOfDimensions[i] = val;
-
-				i++;
-			}
-		}
-		int size = 1;
-		for (int i = 0; i < noOfDimensions; i++)
-		{
-			size *= sizeOfDimensions[i];
-		}
-		data = new T[size];
-		if (l2.size() == 0)
-		{
-			for (int i = 0; i < noOfDimensions; i++)
-			{
-				startingIndex[i] = 0;
-			}
-		}
-		else
-		{
-			int i = 0;
-			for (auto val : l2)
-			{
-				startingIndex[i] = val;
-
-				i++;
-			}
-		}
+		return top == 0;
 	}
-	NDArray(const NDArray<T>& ref)
+
+	Stack(const Stack<T>& ref)
 	{
-		if (ref.data == nullptr)
+		if (ref->capacity <= 0)
 		{
-			this->~NDArray();
+			data = nullptr;
+			capacity = 0;
 			return;
 		}
-		noOfDimensions = ref.noOfDimensions;
-		sizeOfDimensions = new int[noOfDimensions];
-		startingIndex = new int[noOfDimensions];
-
-		for (int i = 0; i < noOfDimensions; i++)
+		capacity = ref.capacity;
+		data = new T[capacity];
+		for (int i = 0; i < capacity; i++)
 		{
-			sizeOfDimensions[i] = ref.sizeOfDimensions[i];
-			startingIndex[i] = ref.startingIndex[i];
-			data[i] = ref.data[i];
+			this - data[i] = ref.data[i];
 		}
-
 	}
-	NDArray<T>& operator=(const NDArray<T>& ref)
+
+	//Assignment Operator
+	Stack& operator=(const Stack<T>& ref)
 	{
 		if (ref.data == nullptr)
 		{
-			this->~NDArray();
-			return *this;
+			data = nullptr;
+			capacity = 0;
+			//	return;
 		}
-		if (ref.data == *this)
+		if (ref == *this)
 		{
 			return *this;
 		}
-		noOfDimensions = ref.noOfDimensions;
-		sizeOfDimensions = new int[noOfDimensions];
-		startingIndex = new int[noOfDimensions];
-
-		for (int i = 0; i < noOfDimensions; i++)
+		this->~Stack();
+		capacity = ref.capacity;
+		data = new T[capacity];
+		for (int i = 0; i < capacity; i++)
 		{
-			sizeOfDimensions[i] = ref.sizeOfDimensions[i];
-			startingIndex[i] = ref.startingIndex[i];
-			data[i] = ref.data[i];
+			this->data[i] = ref.data[i];
 		}
 		return *this;
-
 	}
-	int getNumberOfDimensions()const
-	{
-		return noOfDimensions;
-	}
-	int getDimensionSize(int i)const
-	{
-		if (isValidDimension(i))
-		{
-			return sizeOfDimensions[i];
-		}
-		exit(0);
-	}
-	int getDimensionLowerIndex(const int dimension)
-	{
-		if (isValidDimension(dimension))
-		{
-			return startingIndex[dimension];
-		}
-		exit(0);
-	}
-	int getDimensionHigherIndex(const int dimension)
-	{
-		if (isValidDimension(dimension))
-		{
-			return (startingIndex[dimension] + (sizeOfDimensions[dimension] - 1));
-		}
-	}
-	bool isIndexBoundsValid(const initializer_list<int>& list)
+	T pop()
 	{
 
-		int i = 0;
-		for (auto index : list)
-		{
-			if (!(index >= getDimensionLowerIndex(i) && index <= getDimensionHigherIndex(i)))
-			{
-				return false;
-			}
-			i++;
-		}
-		return true;
+		if (isEmpty())
+			exit(0);
+		T val = data[--top];
+		if (top > 0 && top == capacity / 4)
+			resize(capacity / 2);
+		return val;
 	}
-	T& operator()(const initializer_list<int>& list)
+	T stackTop()
 	{
-		int index = getRowMajorIndexMapping(list);
-		return data[index];
+		cout << " the value of top in stack top function is " << endl;
+		return data[top-1 ];
 	}
-	const T& operator()(const initializer_list<int>& list)const
+	~Stack()
 	{
-		int index = getRowMajorIndexMapping(list);
-		return data[index];
-	}
-
-	~NDArray()
-	{
-		if (data)
-		{
-			data = nullptr;
-		}
+		if (!data)
+			return;
 		delete[]data;
-		if (sizeOfDimensions)
-		{
-			sizeOfDimensions = nullptr;
-		}
-		delete[]sizeOfDimensions;
-
-		if (startingIndex)
-		{
-			startingIndex = nullptr;
-		}
-		delete[]startingIndex;
-		noOfDimensions = 0;
+		data = nullptr;
+		capacity = 0;
+		top = 0;
 	}
-
+	
 };
 int main()
 {
-	//NDArray<int>b({2,4},{5,-1});
-//1ST SAMPLE RUN
-	// cout<<"Number Of Dimensions : "<<b.getNumberOfDimensions()<<endl;
-//    
-//     for(int i=0;i<b.getNumberOfDimensions();i++) 
-//     {
-//     	cout<<"Dim #"<<i<<"  size="<<b.getDimensionSize(i)<<" Index Range= ("<<b.getDimensionLowerIndex(i)<<" ~ "<<b.getDimensionHigherIndex(i)<<")"<<endl;
-//     }
+	Stack<int> a;
 
-//for(int i=b.getDimensionLowerIndex(0);i<=b.getDimensionHigherIndex(0);i++)
-//{
-//    for(int j=b.getDimensionLowerIndex(1);j<=b.getDimensionHigherIndex(1);j++)
-//    {
-//       cout<<"["<<i<<":"<<j<<"]= ";
-//       cin>>b({i,j});	
-//    }
-//}
-
-//for(int i=b.getDimensionLowerIndex(0);i<=b.getDimensionHigherIndex(0);i++)
-//{
-//    for(int j=b.getDimensionLowerIndex(1);j<=b.getDimensionHigherIndex(1);j++)
-//    {
-//       cout<<b({i,j})<<"\t";
-//    }
-//    cout<<"\n";
-//}
-
-//Sample 3
- //NDArray<int> b({2,4},{-3,2});
-// b({1,2})=78;
-
-
-	//SAMPLE RUN4
-
-  /*NDArray<int> b({2,4,3},{2,7});
-	cout<<"Number Of Dimensions : "<<b.getNumberOfDimensions()<<endl;
-
-	 for(int i=0;i<b.getNumberOfDimensions();i++)
-	 {
-		cout<<"Dim #"<<i<<"  size="<<b.getDimensionSize(i)<<" Index Range= ("<<b.getDimensionLowerIndex(i)<<" ~ "<<b.getDimensionHigherIndex(i)<<")"<<endl;
-	 }*/
-
-
-
-
-	 //SAMPLE RUN5
-	/*NDArray<int> b({2,4},{2,7,9});
-	cout<<"Number Of Dimensions : "<<b.getNumberOfDimensions()<<endl;
-
-	 for(int i=0;i<b.getNumberOfDimensions();i++)
-	 {
-		cout<<"Dim #"<<i<<"  size="<<b.getDimensionSize(i)<<" Index Range= ("<<b.getDimensionLowerIndex(i)<<" ~ "<<b.getDimensionHigherIndex(i)<<")"<<endl;
-	 }*/
-
-	 //SAMPLE RUN 6
-  //NDArray<int> a;
-//     cout<<"Number of Dimensions = "<<a.getNumberOfDimensions();
-
-
-	 //SAMPLE RUN 7
-	NDArray<int> a({ 5 });
-	for (int i = a.getDimensionLowerIndex(0); i <= a.getDimensionHigherIndex(0); i++)
+	for (int i = 0; i < 10; i++)
 	{
-		cout << "[" << i << "]: ";
-		cin >> a({ i });
+		a.push(i + 1);
+	}
+	cout << " stack top " << a.stackTop();
+
+	for (int i = 0; i < 10; i++)
+
+	{
+		cout << a.pop();
+		cout << endl;
 	}
 
-	for (int i = a.getDimensionLowerIndex(0); i <= a.getDimensionHigherIndex(0); i++)
-	{
-		cout << a({ i }) << ",";
-	}
 
-	return 0;
+
 }
