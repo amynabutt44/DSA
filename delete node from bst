@@ -1,0 +1,48 @@
+
+Node* deleteNode(Node* root , int x)
+{
+	if (root ==  nullptr)
+	{
+		return nullptr;
+	}
+	if (root->data == x)
+	{
+		// o child
+		if (root->left == nullptr && root->right == nullptr)
+		{
+			delete root;
+			return nullptr;
+		}
+		// 1 child
+		if (root->left != nullptr && root->right == nullptr)
+		{
+			Node* temp = root->left;
+			delete root;
+			return temp;
+		}
+		if (root->right != nullptr && root->left == nullptr)
+		{
+			Node* temp = root->right;
+			delete root;
+			return temp;
+		}
+		//2 child
+		if (root->left != nullptr && root->right != nullptr)
+		{
+			int mini = minvalue(root->right)->data;
+			root->data = mini;
+			root->right = deleteNode(root->right, mini);
+			return root;
+		}
+	 }
+	if (root->data > x)
+	{
+		root->left = deleteNode(root->left, x);
+		return root;
+	}
+	else
+	{
+		root->right = deleteNode(root->right, x);
+		return root;
+	}
+}
