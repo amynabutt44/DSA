@@ -1,0 +1,29 @@
+void inorder(TreeNode<int>* root , vector<int> & val)
+{
+    if(root== nullptr)
+    {
+        return ;
+    }
+    inorder(root->left , val);
+    val.push_back(root->data);
+    inorder(root->right, val);
+}
+TreeNode<int>* flatten(TreeNode<int>* root)
+{
+    vector<int> val;
+    inorder(root, val);
+    TreeNode<int> * temp = new TreeNode<int> (val[0]);
+    TreeNode<int> *curr = temp;
+    int n = val.size();
+    for(int i =1;i<n;i++ )
+    {
+        TreeNode<int> * rn = new TreeNode<int> (val[i]);
+        curr->right =rn;
+        curr->left = nullptr;
+        curr= rn;
+    }
+    curr->right= nullptr;
+     curr->left = nullptr;
+     return temp;
+
+}
