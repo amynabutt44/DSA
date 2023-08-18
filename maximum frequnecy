@@ -1,0 +1,21 @@
+#include <map>
+int maximumFrequency(vector<int> &arr, int n)
+{
+    unordered_map<int,int> mapp;
+    int maxfrequency=0;
+    int  maxans=0;
+    for(int i=0;i<n;i++)
+    {
+      mapp[arr[i]]++;
+      maxfrequency= max(maxfrequency, mapp[arr[i]]);
+    }
+    for(int i=0;i<mapp.size();i++)
+    {
+      if(maxfrequency== mapp[arr[i]])
+      {
+        maxans=arr[i];
+        break;
+      }
+    }
+    return maxans;
+}
